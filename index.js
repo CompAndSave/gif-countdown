@@ -39,29 +39,27 @@ class GifCountdown {
   /**
    * Register font and text setting
    * 
-   * @param {string} fontPath Font path
-   * @param {string} fontName Font family name, e.g., `Open Sans`
-   * @param {string|number} fontSize Font size in pixel, e.g., `40`
-   * @param {function} textFn Function to generate the text string by timer parameter. E.g., ``` (counter)=> `${counter.days} : ${counter.hours} : ${counter.minutes} : ${counter.seconds}` ```
-   * @param {string} textColor Color string for text. E.g., `rgb(163, 168, 178)`
-   * @param {number} textXoffset X coordinate offset for text
-   * @param {number} textYoffset Y coordinate offset for text
+   * @param {object} fontText
+   * @param {string} fontText.font_path Font path
+   * @param {string} fontText.font_name Font family name, e.g., `Open Sans`
+   * @param {string|number} fontText.font_size Font size in pixel, e.g., `40`
+   * @param {function} fontText.text_fn Function to generate the text string by timer parameter. E.g., ``` (counter)=> `${counter.days} : ${counter.hours} : ${counter.minutes} : ${counter.seconds}` ```
+   * @param {string} fontText.text_color Color string for text. E.g., `rgb(163, 168, 178)`
+   * @param {number} fontText.text_x_offset X coordinate offset for text
+   * @param {number} fontText.text_y_offset Y coordinate offset for text
    */
-  async registerFontText(fontPath, fontName, fontSize, textFn, textColor, textXoffset, textYoffset) {
-    if (!fontPath) { throw new Error("fontPath is not provided"); }
-    if (!fontName) { throw new Error("fontName is not provided"); }
-    if (!fontSize) { throw new Error("fontSize is not provided"); }
-    if (!textFn) { throw new Error("textFn is not provided"); }
-    if (!textXoffset) { throw new Error("textXoffset is not provided"); }
-    if (!textYoffset) { throw new Error("textYoffset is not provided"); }
+  async registerFontText(fontText) {
+    if (!fontText) { throw new Error("fontText object is not provided");}
+    if (!fontText.font_path) { throw new Error("font_path is not provided"); }
+    if (!fontText.font_name) { throw new Error("font_name is not provided"); }
+    if (!fontText.font_size) { throw new Error("font_size is not provided"); }
+    if (!fontText.text_fn) { throw new Error("text_fn is not provided"); }
+    if (!fontText.text_color) { throw new Error("text_color is not provided"); }
+    if (!fontText.text_x_offset) { throw new Error("text_x_offset is not provided"); }
+    if (!fontText.text_y_offset) { throw new Error("text_y_offset is not provided"); }
 
-    registerFont(fontPath, { family: fontName });
-    this.fontName = fontName;
-    this.fontSize = fontSize.toString();
-    this.textFn = textFn;
-    this.textColor = textColor;
-    this.textXoffset = textXoffset;
-    this.textYoffset = textYoffset;
+    registerFont(fontText.font_path, { family: fontText.font_name });
+    this.fontText = fontText;
   }
 
   /**
@@ -74,7 +72,7 @@ class GifCountdown {
    */
   async generate(outputPathName, expDateTime, fromDateTime) {
     if (!this.image) { throw new Error("Background image is not loaded. Run loadImage() first"); }
-    if (!this.fontName) { throw new Error("Font and text are not configured. Run registerFontText() first"); }
+    if (!this.fontText) { throw new Error("Font and text are not configured. Run registerFontText() first"); }
 
     const ws = fs.createWriteStream(outputPathName);
   
@@ -84,7 +82,7 @@ class GifCountdown {
     for (let i = 0; i <= this.numFrames; i++) {
       frames.push(this.#createFrame(counter.getStringValue()));
       delays.push(this.delay);
-      counter.secondDown(1);
+      counter.secondDown(this.numSecondDown);
     }
 
     const encoder = new GIFEncoder(this.imageWidth, this.imageHeight);
@@ -112,10 +110,10 @@ class GifCountdown {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
 
-    const text = this.textFn(counter);
-    ctx.font = `${this.fontSize}px "${this.fontName}"`;
-    ctx.fillStyle = this.textColor;
-    ctx.fillText(text, this.textXoffset, this.textYoffset);
+    const text = this.fontText.text_fn(counter);
+    ctx.font = `${this.fontText.font_size}px "${this.fontText.font_name}"`;
+    ctx.fillStyle = this.fontText.text_color;
+    ctx.fillText(text, this.fontText.text_x_offset, this.fontText.text_y_offset);
 
     return ctx;
   }
