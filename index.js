@@ -1,7 +1,6 @@
 'use strict';
 
-const { GifEncoder } = require('@skyra/gifenc');
-const { buffer } = require('node:stream/consumers');
+const { GIFEncoder, quantize, applyPalette } = require("gifenc");
 const { loadImage, createCanvas, registerFont } = require("canvas");
 const DateTimeCounter = require("./lib/DateTimeCounter");
 
@@ -14,14 +13,12 @@ class GifCountdown {
    * @param {number} [frameDelay=1000] Delay in milliseond between frames in GIF. Default is `1000`
    * @param {number} [numFrames=60] Number of frames at gif. Default is `60`
    * @param {number} [gifNumRepeat=0] Number of times to repeat (0 for infinite). Default is `0`
-   * @param {number} [gifQuality=10] Gif quality. Default is `10`
    * @param {number} [numSecondDown=1] Number of seconds decrease per frame. Default is `1`
    */
-  constructor(frameDelay = 1000, numFrames = 60, gifNumRepeat = 0, gifQuality = 10, numSecondDown = 1) {
+  constructor(frameDelay = 1000, numFrames = 60, gifNumRepeat = 0, numSecondDown = 1) {
     this.delay = frameDelay;
     this.numFrames = numFrames;
     this.gifNumRepeat = gifNumRepeat;
-    this.gifQuality = gifQuality;
     this.numSecondDown = numSecondDown;
   }
 
@@ -82,14 +79,16 @@ class GifCountdown {
       counter.secondDown(this.numSecondDown);
     }
 
-    const encoder = new GifEncoder(this.imageWidth, this.imageHeight);
-    const stream = encoder.createReadStream();
-    encoder.setRepeat(this.gifNumRepeat).setDelay(this.delay).setQuality(this.gifQuality).start();
-    
-    frames.forEach(frame => encoder.addFrame(frame));
-    
-    encoder.finish();
-    return await buffer(stream);
+    const gif = GIFEncoder();
+    for (const frame of frames) {
+      const { data, width, height } = frame.getImageData(0, 0, this.imageWidth, this.imageHeight);
+      const palette = quantize(data, 256);
+      const index = applyPalette(data, palette);
+      gif.writeFrame(index, width, height, { palette, delay: this.delay, repeat: this.gifNumRepeat });
+    }
+    gif.finish();
+
+    return gif.bytes();
   }
 
   /**
