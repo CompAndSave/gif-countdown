@@ -19,3 +19,5 @@ await gifCountdown.registerFontText(
 );
 await gifCountdown.generate(path.join(__dirname, "./output/output.gif"), "2023-01-01T23:59:59");
 ```
+
+![alt text](https://raw.githubusercontent.com/CompAndSave/gif-countdown/master/example/output/output.gif)
