@@ -1,6 +1,6 @@
 {
   "name": "gif-countdown",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Library to generate GIF countdown with customized background image and font",
   "main": "index.js",
   "scripts": {
