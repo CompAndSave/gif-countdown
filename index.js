@@ -1,7 +1,7 @@
 'use strict';
 
-const GIFEncoder = require("gif-encoder-2");
-const fs = require("fs");
+const { GifEncoder } = require('@skyra/gifenc');
+const { buffer } = require('node:stream/consumers');
 const { loadImage, createCanvas, registerFont } = require("canvas");
 const DateTimeCounter = require("./lib/DateTimeCounter");
 
@@ -65,16 +65,13 @@ class GifCountdown {
   /**
    * Generate the gif
    * 
-   * @param {string} outputPathName Output file path and name
    * @param {string} expDateTime Expiration date time. ISO format, e.g., 2023-01-01T23:59:59
    * @param {string} [fromDate] Count from date time. If not provided, current date time will be used
-   * @returns {promise}
+   * @returns {promise} Promise with gif data buffer
    */
-  async generate(outputPathName, expDateTime, fromDateTime) {
+  async generate(expDateTime, fromDateTime) {
     if (!this.image) { throw new Error("Background image is not loaded. Run loadImage() first"); }
     if (!this.fontText) { throw new Error("Font and text are not configured. Run registerFontText() first"); }
-
-    const ws = fs.createWriteStream(outputPathName);
   
     const counter = new DateTimeCounter(expDateTime, fromDateTime);
     const frames = [], delays = [];
@@ -85,18 +82,14 @@ class GifCountdown {
       counter.secondDown(this.numSecondDown);
     }
 
-    const encoder = new GIFEncoder(this.imageWidth, this.imageHeight);
-    encoder.createReadStream().pipe(ws);
-  
-    encoder.start();
-    encoder.setRepeat(this.gifNumRepeat);
-    encoder.setDelay(this.delay);
-    encoder.setQuality(this.gifQuality);
-  
-    frames.forEach(frame => encoder.addFrame(frame)); 
+    const encoder = new GifEncoder(this.imageWidth, this.imageHeight);
+    const stream = encoder.createReadStream();
+    encoder.setRepeat(this.gifNumRepeat).setDelay(this.delay).setQuality(this.gifQuality).start();
+    
+    frames.forEach(frame => encoder.addFrame(frame));
+    
     encoder.finish();
-  
-    return new Promise((resolve)=> ws.on("finish", ()=> resolve()));
+    return await buffer(stream);
   }
 
   /**

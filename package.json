@@ -27,8 +27,7 @@
     "eslint": "^8.55.0"
   },
   "dependencies": {
-    "canvas": "^2.11.2",
-    "fs": "^0.0.1-security",
-    "gif-encoder-2": "^1.0.5"
+    "@skyra/gifenc": "^1.0.1",
+    "canvas": "^2.11.2"
   }
 }
