@@ -1,0 +1,34 @@
+{
+  "name": "gif-countdown",
+  "version": "0.0.0",
+  "description": "Library to generate GIF countdown with customized background image and font",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CompAndSave/gif-countdown.git"
+  },
+  "keywords": [
+    "countdown gif"
+  ],
+  "author": "Andrew Y",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CompAndSave/gif-countdown/issues"
+  },
+  "homepage": "https://github.com/CompAndSave/gif-countdown#readme",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.23.3",
+    "eslint": "^8.55.0"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "fs": "^0.0.1-security",
+    "gif-encoder-2": "^1.0.5"
+  }
+}
