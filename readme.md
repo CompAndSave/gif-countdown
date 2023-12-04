@@ -6,7 +6,7 @@
 * For advanced use, frame delay, number of frames, number of times to repeat, gif quality and number of seconds count down can be configured
 
 ## How to Use - See example folder for details
-```
+```js
 const GifCountdown = require("gif-countdown");
 const path = require("path");
 
