@@ -28,3 +28,6 @@ await gifCountdown.generate("2023-01-01T23:59:59-08:00");
 ```
 
 ![alt text](https://raw.githubusercontent.com/CompAndSave/gif-countdown/master/example/output/output.gif)
+
+## Sample Usage
+1. Create a serverless api to serve animated countdown GIF for email campaign - https://github.com/CompAndSave/email-countdown-serverless
