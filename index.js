@@ -62,7 +62,7 @@ class GifCountdown {
   /**
    * Generate the gif
    * 
-   * @param {string} expDateTime Expiration date time. ISO format, e.g., 2023-01-01T23:59:59
+   * @param {string} expDateTime Expiration date time. ISO format, e.g., 2023-01-01T23:59:59-08:00
    * @param {string} [fromDate] Count from date time. If not provided, current date time will be used
    * @returns {promise} Promise with gif data buffer
    */
