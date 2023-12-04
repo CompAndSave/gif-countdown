@@ -34,6 +34,21 @@ class GifCountdown {
   }
 
   /**
+   * Load expired image
+   * 
+   * @param {string} imagePath Image path
+   */
+  async loadExpiredImage(imagePath) {
+    if (!this.image) { throw new Error("Background image is not loaded. Run loadImage() first"); }
+
+    const expImage = await loadImage(imagePath);
+    if (expImage.width !== this.imageWidth) { throw new Error("Expired image width is not equal to the counter image's"); }
+    if (expImage.height !== this.imageHeight) { throw new Error("Expired image width is not equal to the counter image's"); }
+
+    this.expImage = expImage;
+  }
+
+  /**
    * Register font and text setting
    * 
    * @param {object} fontText
@@ -74,7 +89,7 @@ class GifCountdown {
     const frames = [], delays = [];
 
     for (let i = 0; i <= this.numFrames; i++) {
-      frames.push(this.#createFrame(counter.getStringValue()));
+      frames.push(this.#createFrame(counter));
       delays.push(this.delay);
       counter.secondDown(this.numSecondDown);
     }
@@ -84,7 +99,7 @@ class GifCountdown {
       const { data, width, height } = frame.getImageData(0, 0, this.imageWidth, this.imageHeight);
       const palette = quantize(data, 256);
       const index = applyPalette(data, palette);
-      gif.writeFrame(index, width, height, { palette, delay: this.delay, repeat: this.gifNumRepeat });
+      gif.writeFrame(index, width, height, { palette, delay: this.delay, repeat: counter.isExpired() ? -1 : this.gifNumRepeat });
     }
     gif.finish();
 
@@ -100,12 +115,16 @@ class GifCountdown {
   #createFrame(counter) {
     const canvas = createCanvas(this.imageWidth, this.imageHeight);
     const ctx = canvas.getContext("2d");
-    ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
 
-    const text = this.fontText.text_fn(counter);
-    ctx.font = `${this.fontText.font_size}px "${this.fontText.font_name}"`;
-    ctx.fillStyle = this.fontText.text_color;
-    ctx.fillText(text, this.fontText.text_x_offset, this.fontText.text_y_offset);
+    const useExpImage = counter.isExpired() && this.expImage;
+    ctx.drawImage(useExpImage ? this.expImage : this.image, 0, 0, canvas.width, canvas.height);
+
+    if (!useExpImage) {
+      const text = this.fontText.text_fn(counter.getStringValue());
+      ctx.font = `${this.fontText.font_size}px "${this.fontText.font_name}"`;
+      ctx.fillStyle = this.fontText.text_color;
+      ctx.fillText(text, this.fontText.text_x_offset, this.fontText.text_y_offset);
+    }
 
     return ctx;
   }
